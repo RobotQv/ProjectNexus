@@ -1,0 +1,8 @@
+# 主 RAG 模块额外依赖
+# Embedding 使用智谱 embedding-3 API，通过 httpx 调用
+# 向量库使用 Chroma，本地持久化到 data/main_rag/
+
+chromadb==1.5.9
+python-docx==1.2.0
+pdfminer.six==20260107
+httpx==0.28.1

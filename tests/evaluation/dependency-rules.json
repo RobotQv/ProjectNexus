@@ -1,0 +1,79 @@
+{
+  "version": "v1.0",
+  "created_date": "2026-09-28",
+  "description": "待补齐并复核的评估草稿 - 依赖规则测试样例",
+  "rules": [
+    {
+      "id": "rule001",
+      "predecessor_task": "完成登录接口",
+      "successor_task": "开始前后端联调",
+      "gate": "finish",
+      "date": "2026-10-01",
+      "expected_reason_code": "blocked_now",
+      "description": "登录接口未完成时，联调任务不能开始"
+    },
+    {
+      "id": "rule002",
+      "predecessor_task": "数据库设计",
+      "successor_task": "后端 API 开发",
+      "gate": "start",
+      "date": "2026-09-20",
+      "expected_reason_code": "condition_unmet",
+      "description": "数据库设计未完成，后端 API 开发不能启动"
+    },
+    {
+      "id": "rule003",
+      "predecessor_task": "需求分析",
+      "successor_task": "系统设计",
+      "gate": "finish",
+      "date": "2026-09-15",
+      "expected_reason_code": "satisfied",
+      "description": "需求分析已完成，系统设计可以开始"
+    },
+    {
+      "id": "rule004",
+      "predecessor_task": "前端页面开发",
+      "successor_task": "UI 测试",
+      "gate": "finish",
+      "date": "2026-10-10",
+      "expected_reason_code": "blocked_now",
+      "description": "前端页面未完成，UI 测试无法进行"
+    },
+    {
+      "id": "rule005",
+      "predecessor_task": "单元测试",
+      "successor_task": "集成测试",
+      "gate": "finish",
+      "date": "2026-10-15",
+      "expected_reason_code": "finish_condition_unmet",
+      "description": "单元测试未完成，集成测试条件不满足"
+    },
+    {
+      "id": "rule006",
+      "predecessor_task": "代码审查",
+      "successor_task": "部署上线",
+      "gate": "finish",
+      "date": "2026-10-20",
+      "expected_reason_code": "data_conflict",
+      "description": "代码审查未完成但部署已启动，数据冲突"
+    },
+    {
+      "id": "rule007",
+      "predecessor_task": "性能优化",
+      "successor_task": "压力测试",
+      "gate": "start",
+      "date": "2026-10-25",
+      "expected_reason_code": "timing_unknown",
+      "description": "性能优化预计完成时间未知，无法判断压力测试时间"
+    },
+    {
+      "id": "rule008",
+      "predecessor_task": "用户文档编写",
+      "successor_task": "用户培训",
+      "gate": "finish",
+      "date": "2026-10-30",
+      "expected_reason_code": "future_risk",
+      "description": "用户文档预计完成时间晚于培训需要日期"
+    }
+  ]
+}

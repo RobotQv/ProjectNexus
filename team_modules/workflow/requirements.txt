@@ -1,0 +1,5 @@
+# 轻 RAG 实体索引与工作流额外依赖（聊天模型复用后端注入的 GLM Provider）。
+# Embedding 使用智谱 embedding-3（维度 2048），向量库使用 Chroma，本地持久化到 data/workflow/。
+chromadb==1.5.9
+httpx==0.28.1
+python-dotenv==1.2.3

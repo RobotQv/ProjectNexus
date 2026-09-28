@@ -1,0 +1,223 @@
+{
+  "version": "v1.0",
+  "created_date": "2026-09-28",
+  "description": "待补齐并复核的评估草稿 - 资料问答测试问题",
+  "questions": [
+    {
+      "id": "q001",
+      "project": "project-a",
+      "question": "登录模块的当前进度是多少？",
+      "expected_task_id": 10,
+      "expected_evidence_anchors": ["登录接口已完成七成"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q002",
+      "project": "project-a",
+      "question": "后端 API 什么时候可以开始联调？",
+      "expected_task_id": 15,
+      "expected_evidence_anchors": ["后端接口完成后开始联调"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q003",
+      "project": "project-a",
+      "question": "项目有哪些主要任务？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["任务列表", "项目计划"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q004",
+      "project": "project-a",
+      "question": "前端页面的设计风格是什么？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["设计规范", "UI 指南"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q005",
+      "project": "project-a",
+      "question": "数据库使用的是什么技术栈？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["技术选型文档"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q006",
+      "project": "project-a",
+      "question": "测试负责人的学号是多少？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["成员名单"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q007",
+      "project": "project-a",
+      "question": "项目截止日期是什么时候？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["项目计划", "时间安排"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q008",
+      "project": "project-a",
+      "question": "哪些任务已经完成了？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["任务状态列表"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q009",
+      "project": "project-a",
+      "question": "项目有哪些依赖关系？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["依赖图", "任务关系"],
+      "category": "mixed",
+      "split": "test"
+    },
+    {
+      "id": "q010",
+      "project": "project-a",
+      "question": "谁负责任务分配？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["成员职责"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q011",
+      "project": "project-b",
+      "question": "文档解析模块使用什么库？",
+      "expected_task_id": 20,
+      "expected_evidence_anchors": ["技术文档", "解析方案"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q012",
+      "project": "project-b",
+      "question": "向量数据库选型是什么？",
+      "expected_task_id": 25,
+      "expected_evidence_anchors": ["RAG 技术方案"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q013",
+      "project": "project-b",
+      "question": "工作流模块的负责人是谁？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["成员分工"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q014",
+      "project": "project-b",
+      "question": "项目当前有哪些风险？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["风险分析报告"],
+      "category": "mixed",
+      "split": "test"
+    },
+    {
+      "id": "q015",
+      "project": "project-b",
+      "question": "AI 助手的响应时间要求是多少？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["性能要求"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q016",
+      "project": "project-b",
+      "question": "哪些任务处于阻塞状态？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["任务状态", "依赖关系"],
+      "category": "entity_status",
+      "split": "test"
+    },
+    {
+      "id": "q017",
+      "project": "project-b",
+      "question": "项目的里程碑有哪些？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["项目计划"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q018",
+      "project": "project-b",
+      "question": "前端使用什么框架开发？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["技术栈文档"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q019",
+      "project": "project-a",
+      "question": "项目使用了哪些外部 API？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["接口文档", "第三方服务"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q020",
+      "project": "project-a",
+      "question": "任务的优先级是如何确定的？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["项目管理规范"],
+      "category": "mixed",
+      "split": "test"
+    },
+    {
+      "id": "q021",
+      "project": "project-b",
+      "question": "如何评估模型的回答质量？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": ["评估标准"],
+      "category": "material_qa",
+      "split": "test"
+    },
+    {
+      "id": "q022",
+      "project": "project-b",
+      "question": "项目的预算是多少？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": [],
+      "category": "insufficient",
+      "split": "test"
+    },
+    {
+      "id": "q023",
+      "project": "project-a",
+      "question": "客户联系人是谁？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": [],
+      "category": "insufficient",
+      "split": "test"
+    },
+    {
+      "id": "q024",
+      "project": "project-b",
+      "question": "服务器的具体配置是什么？",
+      "expected_task_id": null,
+      "expected_evidence_anchors": [],
+      "category": "insufficient",
+      "split": "test"
+    }
+  ]
+}

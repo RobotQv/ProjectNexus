@@ -1,0 +1,86 @@
+{
+  "version": "v1.0",
+  "created_date": "2026-09-28",
+  "description": "待补齐并复核的评估草稿 - 会议记录抽取样例",
+  "samples": [
+    {
+      "id": "extract001",
+      "text": "张三在会议中提到：'登录接口这周已经完成了大约 70%，预计下周三可以全部完成。李四负责前端配合，需要在登录完成后开始联调。'",
+      "expected_fields": {
+        "tasks": [
+          {
+            "title": "完成登录接口",
+            "assignee": "张三",
+            "progress": 70,
+            "expected_completion": "下周三"
+          },
+          {
+            "title": "前后端联调",
+            "assignee": "李四",
+            "dependency": "登录接口完成"
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract002",
+      "text": "王五汇报：'数据库设计已经完成了，现在可以开始后端 API 的开发。建议由赵六负责 API 开发，预计需要两周时间。'",
+      "expected_fields": {
+        "tasks": [
+          {
+            "title": "数据库设计",
+            "assignee": "王五",
+            "status": "completed"
+          },
+          {
+            "title": "后端 API 开发",
+            "assignee": "赵六",
+            "estimated_duration": "两周"
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract003",
+      "text": "讨论决定：'前端页面开发由钱七负责，需要在 10 月 10 日前完成。完成后由孙八进行 UI 测试。如果时间来不及，可能需要调整优先级。'",
+      "expected_fields": {
+        "tasks": [
+          {
+            "title": "前端页面开发",
+            "assignee": "钱七",
+            "deadline": "2026-10-10"
+          },
+          {
+            "title": "UI 测试",
+            "assignee": "孙八",
+            "dependency": "前端页面开发完成"
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract004",
+      "text": "会议总结：'本周主要完成了需求分析和系统设计。下周开始进入开发阶段。项目管理由周九负责，需要确保各模块按时交付。'",
+      "expected_fields": {
+        "tasks": [
+          {
+            "title": "需求分析",
+            "status": "completed"
+          },
+          {
+            "title": "系统设计",
+            "status": "completed"
+          },
+          {
+            "title": "开发阶段",
+            "start": "下周"
+          },
+          {
+            "title": "项目管理",
+            "assignee": "周九"
+          }
+        ]
+      }
+    }
+  ]
+}

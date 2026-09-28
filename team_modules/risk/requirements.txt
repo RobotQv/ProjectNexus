@@ -1,0 +1,9 @@
+# 本模块额外依赖：无。
+#
+# 规则引擎只使用 Python 标准库（datetime）与 shared 里的公共契约，不引入任何第三方库：
+# 不需要向量库、Embedding、HTTP 客户端或模型 SDK，也不访问数据库。
+# 因此风险模块可以在不启动后端、不安装其他组员依赖的环境里独立单测。
+#
+# 运行本目录测试需要 pytest（与项目主干 pyproject.toml 的 dev 依赖一致）：
+#   pytest team_modules/risk/tests
+# 原提交包的独立运行器未合入；统一在项目根目录使用上述 pytest 命令。

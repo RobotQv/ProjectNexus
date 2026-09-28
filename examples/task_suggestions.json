@@ -1,0 +1,16 @@
+[
+  {
+    "suggestion_type": "create_task",
+    "proposed_payload": {"title": "完成登录接口", "description": "支持学号登录", "planned_end": "2026-09-25"},
+    "source_refs": [],
+    "entity_candidates": [],
+    "validation_warnings": ["负责人未明确，请人工选择"]
+  },
+  {
+    "suggestion_type": "update_task",
+    "proposed_payload": {"task_id": 12, "expected_version": 3, "changes": {"status": "in_progress", "progress": 70}},
+    "source_refs": [],
+    "entity_candidates": [],
+    "validation_warnings": []
+  }
+]
