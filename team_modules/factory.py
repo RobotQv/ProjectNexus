@@ -16,7 +16,13 @@ def build_modules(*, settings, llm):
         "base_url": settings.llm_base_url,
     }
     return Modules(
-        main_rag=MainRAGAdapter(**embedding, store_dir=root / "main_rag"),
+        main_rag=MainRAGAdapter(
+            **embedding,
+            store_dir=root / "main_rag",
+            retrieval_mode=settings.rag_retrieval_mode,
+            chunk_strategy=settings.rag_chunk_strategy,
+            candidate_limit=settings.rag_candidate_limit,
+        ),
         entities=EntityAdapter(**embedding, store_dir=root / "workflow"),
         workflow=WorkflowAdapter(llm=llm),
         risk=RiskAdapter(),

@@ -9,13 +9,16 @@
 import { computed, ref } from 'vue'
 
 import ChatMessages from './ChatMessages.vue'
+import AssistantProgress from './AssistantProgress.vue'
+import { useAssistantProgress } from '@/composables/useAssistantProgress.js'
 import ModalDialog from './ModalDialog.vue'
 import SuggestionCard from './SuggestionCard.vue'
 import { newRequestKey } from '@/api/resources.js'
-import { askAssistant, editSuggestion, submitSuggestion, workspace } from '@/stores/workspace.js'
+import { editSuggestion, submitSuggestion, workspace } from '@/stores/workspace.js'
 import { toast } from '@/stores/toasts.js'
 
 const emit = defineEmits(['close', 'goto-review'])
+const { progress, send: sendWithProgress } = useAssistantProgress()
 
 const text = ref('')
 const sending = ref(false)
@@ -37,7 +40,7 @@ async function send() {
   messages.value.push({ role: 'me', text: value })
   text.value = ''
   sending.value = true
-  const out = await askAssistant('task_assistant', value, requestKey)
+  const out = await sendWithProgress('task_assistant', value, requestKey, () => { requestKey = newRequestKey() })
   sending.value = false
   if (!out) {
     // 网络失败时保留输入，用同一个 request_key 重试即可复用后端结果。
@@ -118,6 +121,7 @@ const visibleDrafts = computed(() => drafts.value.filter((s) => draftIds.value.i
       </div>
     </template>
 
+    <AssistantProgress :progress="progress" />
     <div class="composer">
       <input
         v-model="text"

@@ -64,6 +64,8 @@ class Evidence(Contract):
     version: int
     block_ids: list[int] = Field(min_length=1, max_length=20)
     quote: str = Field(min_length=1, max_length=8000)
+    filename: str | None = None
+    document_date: date | None = None
 
 
 class Candidate(Contract):
@@ -87,6 +89,8 @@ class EntityRecord(Contract):
     source_version: int
     search_text: str
     is_active: bool
+    title: str = ""
+    aliases: list[str] = Field(default_factory=list)
 
 
 class SuggestionDraft(Contract):

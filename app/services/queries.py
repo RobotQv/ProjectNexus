@@ -9,11 +9,13 @@ from sqlalchemy import or_, select
 
 from app.core.errors import AppError
 from app.db import begin_write, utcnow
-from app.integrations.contracts import Candidate, Resolution, Scope
+from app.integrations.contracts import Resolution, Scope
 from app.models import AnalysisRun, ProjectMember, QueryRun, Task, User
 from app.services.common import project_row, public, require_project, task_query
 from app.services.documents import validate_evidence
+from app.services.entities import entity_catalog
 from app.services.risk import fingerprint, snapshot, validate_result
+from shared.entity_matching import resolve_exact
 
 
 def evaluate(db, pid, actor, modules, evaluation_date=None):
@@ -38,6 +40,11 @@ def evaluate(db, pid, actor, modules, evaluation_date=None):
 
 
 def resolve_candidates(db, pid, request, modules, warnings):
+    exact = resolve_exact(
+        entity_catalog(db, pid), request.question, request.entity_type, request.limit
+    )
+    if exact is not None:
+        return exact.candidates, exact.outcome == "ambiguous"
     scope = Scope(project_id=pid)
     try:
         resolution = Resolution.model_validate(
@@ -75,45 +82,6 @@ def resolve_candidates(db, pid, request, modules, warnings):
                 candidates.append(c)
         except AppError:
             warnings.append("已过滤失效或项目范围外候选")
-    # 精确名称/别名的可解释回退，不伪装成语义检索或输出概率。
-    if not candidates:
-        if request.entity_type == "task":
-            for t in db.scalars(task_query(pid)):
-                if any(
-                    s
-                    and (
-                        s.casefold() in request.question.casefold()
-                        or request.question.casefold() in s.casefold()
-                    )
-                    for s in [t.title, *t.aliases]
-                ):
-                    candidates.append(
-                        Candidate(
-                            entity_type="task",
-                            entity_id=t.id,
-                            title=t.title,
-                            match_reason="名称/别名关键词匹配",
-                        )
-                    )
-        else:
-            for member, user in db.execute(
-                select(ProjectMember, User)
-                .join(User, User.id == ProjectMember.user_id)
-                .where(
-                    ProjectMember.project_id == pid,
-                    ProjectMember.is_active.is_(True),
-                    User.is_active.is_(True),
-                )
-            ):
-                if any(s and s in request.question for s in [user.display_name, *member.aliases]):
-                    candidates.append(
-                        Candidate(
-                            entity_type="member",
-                            entity_id=user.id,
-                            title=user.display_name,
-                            match_reason="成员姓名/别名匹配",
-                        )
-                    )
     # resolved 也不能掩盖多个有效候选；不使用凭空指定的相似度阈值。
     ambiguous = len(candidates) > 1 or (resolution.outcome == "ambiguous" and bool(candidates))
     return candidates[: request.limit], ambiguous

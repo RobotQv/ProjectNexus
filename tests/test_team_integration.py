@@ -98,7 +98,10 @@ def test_real_modules_document_extraction_review_and_history(integrated):
     history = env.client.get(env.prefix + f"/tasks/{task_id}/history").json()["items"]
     assert history[0]["snapshot"]["title"] == "登录接口测试"
     # 新的索引客户端可读同一目录，模拟 API 与 Worker 的独立实例。
-    reopened = VectorStore(modules.main_rag._store_dir)
+    reopened = VectorStore(
+        modules.main_rag._store_dir,
+        collection_name=modules.main_rag.store.collection.name,
+    )
     assert reopened.collection.count() == 1
     assert EntityStore(modules.entities._store_dir).collection.count() >= 2
     assert not model.responses

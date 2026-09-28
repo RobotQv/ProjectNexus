@@ -2,6 +2,10 @@
 
 # 前端工程（Vue 3 + Vite）
 
+Alpha 默认 `VITE_API_BASE=/api/v1`。开发时 Vite 代理到本机 8000；构建后由后端同源提供，不再把其他设备的请求指向它自己的 localhost。原有 `.env.local` 如果写了绝对 localhost 地址，需要同步改成 `/api/v1`。
+
+单地址启动、隔离演示库与跨设备限制见 [Alpha 使用说明](../../docs/ALPHA.md)。两个助手用 `/assistant/progress?request_key=...` 读取真实阶段，非模型逐字输出；回答可以打开真实任务历史。
+
 `frontend/` 下的正式前端。同一份界面的单文件交互原型在 `../prototype/`，
 用于无环境演示；本目录是需要 Node 才能跑起来的工程版本。
 

@@ -8,6 +8,8 @@ from app.services.entities import entity_catalog
 from app.services.risk import snapshot, validate_result
 from app.services.suggestions import validate_draft
 from shared.contracts import CandidateChange, Resolution, RiskPreview, Scope, TaskSearch
+from shared.entity_matching import resolve_exact
+from shared.progress import emit
 
 
 class BoundTools:
@@ -24,6 +26,7 @@ class BoundTools:
         return require_project(db, self._pid, self._actor)
 
     def search_tasks(self, query):
+        emit("reading_facts")
         query = TaskSearch.model_validate(query)
         with self._sessions() as db:
             self._authorize(db)
@@ -47,11 +50,13 @@ class BoundTools:
             return entity_catalog(db, self._pid)
 
     def snapshot(self):
+        emit("reading_facts")
         with self._sessions() as db:
             self._authorize(db)
             return snapshot(db, self._pid)
 
     def resolve(self, text, entity_type="task", limit=10):
+        emit("resolving_entity")
         if (
             not isinstance(text, str)
             or not 1 <= len(text) <= 4000
@@ -61,6 +66,9 @@ class BoundTools:
             raise AppError("invalid_tool_input", "实体检索参数不合法")
         with self._sessions() as db:
             self._authorize(db)
+            exact = resolve_exact(entity_catalog(db, self._pid), text, entity_type, limit)
+            if exact is not None:
+                return exact
         result = Resolution.model_validate(
             self._modules.entities.resolve(Scope(project_id=self._pid), text, entity_type, limit)
         )
@@ -91,6 +99,7 @@ class BoundTools:
             return result
 
     def retrieve(self, question, limit=5):
+        emit("retrieving")
         if not isinstance(question, str) or not 1 <= len(question) <= 4000 or not 1 <= limit <= 20:
             raise AppError("invalid_tool_input", "资料检索参数不合法")
         with self._sessions() as db:

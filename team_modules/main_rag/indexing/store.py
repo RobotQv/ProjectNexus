@@ -12,7 +12,7 @@ DEFAULT_STORE_DIR = Path("data/main_rag")
 
 
 class VectorStore:
-    def __init__(self, store_dir: Path | None = None):
+    def __init__(self, store_dir: Path | None = None, *, collection_name=COLLECTION_NAME):
         self.store_dir = store_dir or DEFAULT_STORE_DIR
         self.store_dir.mkdir(parents=True, exist_ok=True)
         self.client = chromadb.PersistentClient(
@@ -20,9 +20,18 @@ class VectorStore:
             settings=Settings(anonymized_telemetry=False),
         )
         self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
+            name=collection_name,
             metadata={"hnsw:space": "cosine"},
         )
+
+    def snapshot(self, project_id):
+        """每次读持久化集合，API 和 Worker 不维护各自易过期的 BM25 缓存。"""
+        try:
+            return self.collection.get(
+                where={"project_id": project_id}, include=["documents", "metadatas", "embeddings"]
+            )
+        except Exception as exc:
+            raise AppError("index_query_failed", "索引读取失败", 503) from exc
 
     def upsert(
         self,

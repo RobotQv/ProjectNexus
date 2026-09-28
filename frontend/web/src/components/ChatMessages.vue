@@ -14,12 +14,12 @@ const OUTCOME = {
 /** 把答案里的 [1] 变成可点击的引用标记。 */
 function segments(text) {
   const parts = []
-  const pattern = /\[(\d+)\]/g
+  const pattern = /\[(\d+)\]|\*\*([^*]+)\*\*/g
   let last = 0
   let match
   while ((match = pattern.exec(text)) !== null) {
     if (match.index > last) parts.push({ text: text.slice(last, match.index) })
-    parts.push({ cite: Number(match[1]) })
+    parts.push(match[1] ? { cite: Number(match[1]) } : { strong: match[2] })
     last = match.index + match[0].length
   }
   if (last < text.length) parts.push({ text: text.slice(last) })
@@ -35,7 +35,9 @@ function segments(text) {
         <template v-if="m.role === 'me'">{{ m.text }}</template>
         <template v-else>
           <template v-for="(seg, j) in segments(m.answer)" :key="j">
-            <span v-if="seg.cite" class="cite" @click="emit('cite', seg.cite - 1)">[{{ seg.cite }}] 查看原文</span>
+            <span v-if="seg.cite && m.evidence?.[seg.cite - 1]" class="cite" @click="emit('cite', seg.cite - 1, m)">[{{ seg.cite }}] 查看原文</span>
+            <span v-else-if="seg.cite">[{{ seg.cite }}]</span>
+            <strong v-else-if="seg.strong">{{ seg.strong }}</strong>
             <template v-else>{{ seg.text }}</template>
           </template>
         </template>

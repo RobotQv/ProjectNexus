@@ -8,7 +8,7 @@
  * - 不把令牌写进 localStorage。
  */
 
-export const API_BASE = (import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1').replace(/\/+$/, '')
+export const API_BASE = (import.meta.env.VITE_API_BASE || '/api/v1').replace(/\/+$/, '')
 
 /** 后端统一错误体。保留 request_id，便于反馈问题时附带。 */
 export class ApiError extends Error {
@@ -38,7 +38,7 @@ export function getToken() {
 }
 
 async function request(path, { method = 'GET', body, query, raw = false } = {}) {
-  const url = new URL(API_BASE + path)
+  const url = new URL(API_BASE + path, globalThis.location?.origin)
   if (query) {
     for (const [k, v] of Object.entries(query)) {
       if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v)
@@ -60,7 +60,7 @@ async function request(path, { method = 'GET', body, query, raw = false } = {}) 
     })
   } catch (cause) {
     throw new ApiError(0, {
-      error: { code: 'network_unreachable', message: '无法连接本机后端，请确认服务已启动' },
+      error: { code: 'network_unreachable', message: '无法连接后端，请确认服务和网络可用' },
     })
   }
 

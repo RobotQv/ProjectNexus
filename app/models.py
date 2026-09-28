@@ -173,6 +173,7 @@ class WorkflowRun(Base):
     )
     input_text: Mapped[str | None] = mapped_column(Text)
     response_data: Mapped[dict | None] = mapped_column(JSON)
+    progress_events: Mapped[list] = mapped_column(JSON, default=list, server_default="[]")
     request_key: Mapped[str | None] = mapped_column(String(64))
     kind: Mapped[str] = mapped_column(String(16), default="extract")
     status: Mapped[str] = mapped_column(String(16), default="pending")

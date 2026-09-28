@@ -8,6 +8,8 @@ from app.core.errors import AppError
 from shared.llm import LLMProvider as LLMProvider
 from shared.llm import LLMResult as LLMResult
 
+ALWAYS_THINKING_MODELS = {"glm-5.3", "glm-5.3-flash", "glm-5.3-flashx"}
+
 
 class DisabledLLM:
     def complete(self, messages, *, max_tokens=1000):
@@ -29,6 +31,26 @@ class GLMProvider:
         )
         self.slots = threading.BoundedSemaphore(settings.llm_max_concurrency)
 
+    def capability_options(self):
+        """供应商扩展参数按能力发送；其他兼容端点默认不附加 GLM 参数。"""
+        mode = self.settings.llm_thinking
+        model = self.settings.llm_model.lower()
+        official = self.settings.llm_base_url.startswith("https://open.bigmodel.cn/")
+        if mode == "auto":
+            mode = (
+                ("enabled" if model in ALWAYS_THINKING_MODELS else "disabled")
+                if official
+                else "omit"
+            )
+        if mode == "omit":
+            return {}
+        options = {"thinking": {"type": mode}}
+        if model in ALWAYS_THINKING_MODELS:
+            if mode != "enabled":
+                raise AppError("llm_capability_invalid", "该 GLM-5.3 型号不支持关闭思考", 422)
+            options["reasoning_effort"] = self.settings.llm_reasoning_effort
+        return options
+
     def complete(self, messages, *, max_tokens=1000):
         # 限制调用者输入与输出预算；无需把密钥暴露到前端或发到聊天中。
         if not messages or sum(len(str(m.get("content", ""))) for m in messages) > 60000:
@@ -44,17 +66,32 @@ class GLMProvider:
                 json={
                     "model": self.settings.llm_model,
                     "messages": messages,
-                    "max_tokens": max_tokens,
+                    # 5.3 的预算包含必须执行的思考；16-token 路由预算会在输出标签前耗尽。
+                    "max_tokens": max(max_tokens, 4096)
+                    if self.settings.llm_model.lower() in ALWAYS_THINKING_MODELS
+                    else max_tokens,
                     "stream": False,
-                    "thinking": {"type": "disabled"},
+                    **self.capability_options(),
                 },
             )
             if response.status_code == 429:
                 raise AppError("llm_rate_limited", "模型服务限流，请稍后重试", 503)
             if response.status_code >= 400 or response.is_redirect:
-                raise AppError("llm_upstream_error", "模型服务调用失败，请检查服务配置", 502)
+                code = None
+                try:
+                    code = str(response.json().get("error", {}).get("code", ""))[:40]
+                except (ValueError, AttributeError, TypeError):
+                    pass
+                raise AppError(
+                    "llm_upstream_error",
+                    "模型服务调用失败，请检查服务配置",
+                    502,
+                    {"status": response.status_code, "provider_code": code},
+                )
             try:
                 body = response.json()
+                if body["choices"][0].get("finish_reason") == "length":
+                    raise AppError("llm_output_truncated", "模型输出达到预算上限，请缩短输入", 502)
                 content = body["choices"][0]["message"]["content"]
                 if not isinstance(content, str) or not content.strip():
                     raise ValueError("empty completion")

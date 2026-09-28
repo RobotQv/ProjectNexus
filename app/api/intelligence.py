@@ -5,11 +5,19 @@ from sqlalchemy import or_, select
 
 from app.api.deps import DB, Actor, write_scope
 from app.models import AnalysisRun, AuditEvent, Job, QueryRun, Suggestion, WorkflowRun
-from app.responses import AnalysisOut, AssistantOut, Page, QueryOut, SuggestionOut
+from app.responses import (
+    AnalysisOut,
+    AssistantOut,
+    AssistantProgressOut,
+    Page,
+    QueryOut,
+    SuggestionOut,
+)
 from app.schemas import Analyze, AssistantStart, Review, SuggestionEdit, SuggestionSubmit
 from app.schemas import Query as QueryInput
 from app.services.assistant import assistant_response, respond
 from app.services.common import project_row, public, require_project
+from app.services.progress import progress_response
 from app.services.queries import evaluate, query
 from app.services.reviews import (
     edit_suggestion,
@@ -139,6 +147,14 @@ def assistant_message(pid: int, data: AssistantStart, request: Request, db: DB, 
 def assistant_run(pid: int, run_id: int, db: DB, actor: Actor):
     require_project(db, pid, actor)
     return assistant_response(db, project_row(db, WorkflowRun, pid, run_id), actor)
+
+
+@router.get("/assistant/progress", response_model=AssistantProgressOut)
+def assistant_progress(
+    pid: int, db: DB, actor: Actor, request_key: str = Query(min_length=1, max_length=64)
+):
+    """仅提交者可轮询；通过 request_key 查询，不会再次触发模型生成。"""
+    return progress_response(db, pid, actor, request_key)
 
 
 @router.post("/analysis/preview", response_model=AnalysisResult)

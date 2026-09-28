@@ -178,6 +178,7 @@ class TaskHistoryOut(BaseModel):
 
 
 class AssistantOut(BaseModel):
+    fact_versions: dict[str, int] = {}
     run_id: int
     answer: str
     outcome: Literal["answered", "clarify", "insufficient", "partial"]
@@ -190,3 +191,35 @@ class AssistantOut(BaseModel):
     model_id: str
     prompt_version: str
     is_demo: bool
+
+
+class AssistantStageOut(BaseModel):
+    seq: int
+    stage: Literal[
+        "accepted",
+        "interpreting",
+        "resolving_entity",
+        "retrieving",
+        "fusing",
+        "reading_facts",
+        "generating",
+        "validating",
+        "persisting",
+        "completed",
+        "failed",
+    ]
+    message: str
+    state: Literal["running", "completed", "failed"]
+    timestamp: datetime
+    started_ms: int
+    elapsed_ms: int
+
+
+class AssistantProgressOut(BaseModel):
+    run_id: int
+    request_key: str
+    status: Literal["running", "succeeded", "failed"]
+    events: list[AssistantStageOut]
+    error: str | None
+    elapsed_ms: int
+    terminal: bool

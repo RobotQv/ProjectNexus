@@ -18,6 +18,8 @@ def entity_record(db, pid, kind, entity_id):
             source_version=row.version,
             search_text=text,
             is_active=row.deleted_at is None,
+            title=row.title,
+            aliases=row.aliases,
         )
     member = db.scalar(
         select(ProjectMember).where(
@@ -32,6 +34,8 @@ def entity_record(db, pid, kind, entity_id):
         source_version=member.version,
         search_text=" ".join([user.display_name, *member.aliases]),
         is_active=member.is_active and user.is_active,
+        title=user.display_name,
+        aliases=member.aliases,
     )
 
 

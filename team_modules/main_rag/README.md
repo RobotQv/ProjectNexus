@@ -1,5 +1,13 @@
 # 主 RAG 负责人工作区
 
+## Alpha 接入变更
+
+DOCX 按 XML 顺序读取段落和普通表格，每行保留 `table:N/row:N` 锚点；不承诺复杂合并表格或 OCR。`chunking.py` 在原始 Block 上建立独立检索块，默认最多 1200 字符、短块阈值 300、长块重叠 100，保留 block 内字符范围。原始 Block 不变。
+
+`retrieve` 签名不变；`retrieve_ranked` 供评估使用，返回 chunk 排名、原始锚点与两路排名。非连续摘录分开返回 Evidence，不拼造原文。模式由后端设置 `NEXUS_RAG_RETRIEVAL_MODE=vector/bm25/hybrid_rrf`；索引策略为 `baseline/bounded/semantic`。切换分块策略须重建，详见根目录 `docs/ALPHA.md`。
+
+课设规模下从同一份 Chroma 持久化快照计算余弦排名、BM25 与 RRF（c=60），避免进程间缓存过期；不适合直接扩展到海量语料。真实小样本对照见 `artifacts/alpha_handoff/`，下方旧整合说明只记录当时状态。
+
 ## 负责需求与边界
 
 负责 TXT/Markdown/DOCX/文本 PDF 的真实解析、正文分块、Embedding、资料索引、检索及派生索引清理。依据既有审计保证项目隔离、版本一致、来源可回看、重试不重复。扫描 PDF 不承诺 OCR，无可提取正文时明确失败。

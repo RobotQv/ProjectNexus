@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr = SecretStr("")
     llm_timeout_seconds: float = Field(60, ge=1, le=600)
     llm_max_concurrency: int = Field(2, ge=1, le=20)
+    llm_thinking: Literal["auto", "omit", "disabled", "enabled"] = "auto"
+    llm_reasoning_effort: Literal["low", "high", "max"] = "low"
+    rag_retrieval_mode: Literal["vector", "bm25", "hybrid_rrf"] = "hybrid_rrf"
+    rag_chunk_strategy: Literal["baseline", "bounded", "semantic"] = "bounded"
+    rag_candidate_limit: int = Field(20, ge=5, le=100)
+    web_dist_dir: Path | None = None
 
     @model_validator(mode="after")
     def check_secrets(self):

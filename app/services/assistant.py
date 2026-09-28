@@ -10,9 +10,11 @@ from app.db import begin_write, utcnow
 from app.models import Suggestion, Task, WorkflowRun
 from app.services.common import project_row, public, require_project
 from app.services.documents import validate_evidence
+from app.services.progress import append_event, recorder
 from app.services.suggestions import save_draft, validate_draft
 from app.services.tools import BoundTools
 from shared.contracts import AssistantRequest, AssistantResult
+from shared.progress import observe
 
 
 def assistant_response(db, run, actor):
@@ -50,7 +52,8 @@ def assistant_response(db, run, actor):
         except AppError:
             warnings.append("原引用已失效")
             data["answer"], data["outcome"] = "相关来源已失效，请重新提问。", "partial"
-    data.pop("fact_versions", None)
+    # 回答引用版本与当前版本并存，历史界面读取真实 TaskHistory。
+    data["fact_versions"] = data.get("fact_versions", {})
     # 候选再次过滤，历史响应也不能暴露已移除的成员/任务。
     checked = validate_draft(
         db,
@@ -103,17 +106,22 @@ def respond(db, pid, actor, data, sessions, modules):
         started_at=utcnow(),
     )
     db.add(run)
+    append_event(run, "accepted")
     db.commit()
     rid = run.id
     tools = BoundTools(sessions, pid, actor, modules)
     try:
         # 无写事务执行算法；工具不包含确认或任务修改方法。
-        result = AssistantResult.model_validate(
-            modules.workflow.respond(AssistantRequest(entry=data.entry, text=data.text), tools)
-        )
+        record = recorder(sessions, rid)
+        with observe(record):
+            result = AssistantResult.model_validate(
+                modules.workflow.respond(AssistantRequest(entry=data.entry, text=data.text), tools)
+            )
+        record("validating")
         begin_write(db)
         require_project(db, pid, actor, write=True)
         run = project_row(db, WorkflowRun, pid, rid)
+        append_event(run, "persisting")
         for draft in result.suggestions:
             save_draft(db, run, validate_draft(db, pid, draft))
         for ref in result.evidence:
@@ -129,12 +137,14 @@ def respond(db, pid, actor, data, sessions, modules):
         run.response_data = response
         run.model_id, run.prompt_version = result.model_id, result.prompt_version
         run.summary, run.status, run.finished_at = result.answer, "succeeded", utcnow()
+        append_event(run, "completed")
         db.commit()
     except Exception as error:
         begin_write(db)
         run = project_row(db, WorkflowRun, pid, rid)
         run.status, run.finished_at = "failed", utcnow()
         run.error = error.code if isinstance(error, AppError) else "module_execution_failed"
+        append_event(run, "failed")
         db.commit()
         if isinstance(error, ValidationError):
             raise AppError("module_contract_invalid", "助手输出不符合结构化契约", 502) from None

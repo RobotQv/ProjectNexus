@@ -3,14 +3,18 @@ import { computed, ref } from 'vue'
 
 import BlocksDialog from '@/components/BlocksDialog.vue'
 import ChatMessages from '@/components/ChatMessages.vue'
+import AssistantProgress from '@/components/AssistantProgress.vue'
+import TaskHistoryDialog from '@/components/TaskHistoryDialog.vue'
+import { useAssistantProgress } from '@/composables/useAssistantProgress.js'
 import { newRequestKey } from '@/api/resources.js'
-import { askAssistant } from '@/stores/workspace.js'
 import { toast } from '@/stores/toasts.js'
 
 const text = ref('')
 const sending = ref(false)
 const messages = ref([])
 const sourceDialog = ref(null)
+const historyTask = ref(null)
+const { progress, send: sendWithProgress } = useAssistantProgress()
 let requestKey = newRequestKey()
 let requestText = ''
 
@@ -28,7 +32,7 @@ async function send() {
   messages.value.push({ role: 'me', text: value })
   text.value = ''
   sending.value = true
-  const out = await askAssistant('project_assistant', value, requestKey)
+  const out = await sendWithProgress('project_assistant', value, requestKey, () => { requestKey = newRequestKey() })
   sending.value = false
   if (!out) {
     messages.value.pop()
@@ -46,8 +50,8 @@ function pickCandidate(candidate) {
   toast('已带入明确任务，按回车或“发送”重新提问')
 }
 
-function openEvidence(index) {
-  const ref0 = evidence.value[index]
+function openEvidence(index, message) {
+  const ref0 = (message?.evidence || evidence.value)[index]
   if (!ref0) return
   sourceDialog.value = {
     documentId: ref0.document_id,
@@ -67,8 +71,8 @@ function openEvidence(index) {
     </div>
   </div>
 
-  <div class="split">
-    <div class="card">
+  <div class="split assistant-layout">
+    <div class="card assistant-conversation">
       <div class="card-body">
         <ChatMessages
           v-if="messages.length"
@@ -88,6 +92,7 @@ function openEvidence(index) {
           </span>
         </div>
 
+        <AssistantProgress :progress="progress" />
         <div class="composer">
           <input
             v-model="text"
@@ -108,7 +113,7 @@ function openEvidence(index) {
       </div>
     </div>
 
-    <div class="card">
+    <div class="card assistant-evidence">
       <div class="card-head"><h3>事实与来源</h3></div>
       <div class="card-body">
         <template v-if="facts.length">
@@ -117,13 +122,14 @@ function openEvidence(index) {
             TASK-{{ f.id }} · {{ f.title }}<br />
             进度：{{ f.progress }}%
             <br />
-            <span class="note">正式系统将显示更新时间与任务链接</span>
+            <span class="note">回答依据 v{{ last.fact_versions?.[f.id] ?? '未知' }} · 当前 v{{ f.version }}</span>
+            <button class="btn ghost small" @click="historyTask = f">查看版本历史</button>
           </div>
         </template>
 
         <div v-for="(e, i) in evidence" :key="`e${i}`" class="src">
           <b>[{{ i + 1 }}] {{ e.filename || `文档 ${e.document_id}` }}</b><br />
-          <span class="note">第 {{ e.locator || '—' }} · 文档版本 {{ e.version }}</span>
+          <span class="note">文档版本 {{ e.version }} · 资料日期 {{ e.document_date || '未提供' }}</span>
           <p class="q">{{ e.quote }}</p>
           <button class="btn ghost small" style="margin-top: 8px" @click="openEvidence(i)">展开证据</button>
         </div>
@@ -150,4 +156,5 @@ function openEvidence(index) {
     :title="sourceDialog.title"
     @close="sourceDialog = null"
   />
+  <TaskHistoryDialog v-if="historyTask" :task="historyTask" @close="historyTask = null" />
 </template>

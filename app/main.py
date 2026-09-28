@@ -12,7 +12,8 @@ from alembic.script import ScriptDirectory
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError, OperationalError
@@ -213,6 +214,23 @@ def create_app(settings=None, *, engine=None, modules=None, llm=None):
 
     for router in (projects.router, tasks.router, documents.router, intelligence.router):
         app.include_router(router, prefix="/api/v1")
+    if settings.web_dist_dir is not None:
+        dist = settings.web_dist_dir.resolve()
+        if not (dist / "index.html").is_file():
+            raise ValueError("前端构建不存在，请先在 frontend/web 执行 npm run build")
+        if (dist / "assets").is_dir():
+            app.mount("/assets", StaticFiles(directory=dist / "assets"), name="web-assets")
+
+        @app.get("/{web_path:path}", include_in_schema=False)
+        def web_page(web_path: str):
+            # 只提供构建产物，不能将 .env / 数据库等工作目录文件作为静态资源。
+            if web_path.split("/")[0] in {"api", "health", "assets"}:
+                raise HTTPException(404, "Not found")
+            candidate = (dist / web_path).resolve()
+            if candidate.is_relative_to(dist) and candidate.is_file():
+                return FileResponse(candidate)
+            return FileResponse(dist / "index.html")
+
     return app
 
 

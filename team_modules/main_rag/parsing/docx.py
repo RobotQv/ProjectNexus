@@ -1,6 +1,8 @@
 """DOCX 解析：按段落切分正文块，保留标题作为 heading，不伪造页码。"""
 
 from docx import Document
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 from shared.contracts import FileRef, ParsedBlock, ParsedDocument
 from shared.errors import AppError
@@ -36,7 +38,28 @@ def parse_docx(file: FileRef) -> ParsedDocument:
     blocks: list[ParsedBlock] = []
     current_heading: str | None = None
 
-    for paragraph in document.paragraphs:
+    # 遍历 XML 同级元素，不能分别读取 paragraphs / tables 后拼接而打乱原文。
+    table_no = 0
+    for element_no, element in enumerate(document.element.body):
+        if element.tag.endswith("}tbl"):
+            table_no += 1
+            table = Table(element, document)
+            for row_no, row in enumerate(table.rows, 1):
+                cells = [cell.text.strip().replace("\n", " / ") for cell in row.cells]
+                if not any(cells):
+                    continue
+                blocks.append(
+                    ParsedBlock(
+                        block_no=len(blocks),
+                        text=" | ".join(cells),
+                        heading=current_heading,
+                        locator=f"table:{table_no}/row:{row_no}",
+                    )
+                )
+            continue
+        if not element.tag.endswith("}p"):
+            continue
+        paragraph = Paragraph(element, document)
         text = paragraph.text.strip()
         if not text:
             continue
@@ -48,6 +71,7 @@ def parse_docx(file: FileRef) -> ParsedDocument:
                     block_no=len(blocks),
                     text=text,
                     heading=current_heading,
+                    locator=f"body:{element_no}/paragraph",
                 )
             )
             continue
@@ -57,6 +81,7 @@ def parse_docx(file: FileRef) -> ParsedDocument:
                 block_no=len(blocks),
                 text=text,
                 heading=current_heading,
+                locator=f"body:{element_no}/paragraph",
             )
         )
 

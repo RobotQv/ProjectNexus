@@ -396,7 +396,7 @@ function replaceSuggestion(out) {
  * 两处入口共用同一接口，以 entry 区分。
  * 每次主动提问生成新的 request_key；网络重试复用同一个值。
  */
-export async function askAssistant(entry, text, requestKey) {
+export async function askAssistant(entry, text, requestKey, options = {}) {
   const request_key = requestKey || newRequestKey()
   try {
     const out = isLive.value
@@ -405,6 +405,7 @@ export async function askAssistant(entry, text, requestKey) {
     await reloadSuggestions()
     return out
   } catch (error) {
+    options.onError?.(error)
     handle(error)
     return null
   }

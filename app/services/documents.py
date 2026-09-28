@@ -141,7 +141,8 @@ def validate_evidence(db, pid, evidence, *, require_index=True):
     quoted_text = "\n".join(blocks[key].text for key in valid.block_ids)
     if valid.quote not in quoted_text:
         raise AppError("invalid_evidence", "引用摘录与原文不一致")
-    return valid
+    # 标题和日期回源覆盖，不能采信模型或索引伪造的来源元数据。
+    return valid.model_copy(update={"filename": doc.filename, "document_date": doc.document_date})
 
 
 def reset_failed_job(job):

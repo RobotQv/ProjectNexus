@@ -73,6 +73,7 @@ export const suggestionApi = {
 }
 
 export const assistantApi = {
+  progress: (pid, request_key) => api.get(`${P(pid)}/assistant/progress`, { request_key }),
   // 两处入口共用，以 entry 区分：project_assistant / task_assistant。
   send: (pid, entry, text, request_key) =>
     api.post(`${P(pid)}/assistant/messages`, { entry, text, request_key }),

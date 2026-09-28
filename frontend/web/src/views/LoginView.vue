@@ -16,7 +16,7 @@ async function submit() {
 <template>
   <div class="page" style="max-width: 520px; margin: 0 auto">
     <div class="card" style="margin-top: 40px">
-      <div class="card-head"><h3>连接本机后端</h3></div>
+      <div class="card-head"><h3>登录项目平台</h3></div>
       <div class="card-body">
         <p class="note">
           后端地址 <span class="code">{{ API_BASE }}</span>，由 <span class="code">VITE_API_BASE</span> 配置。
@@ -27,7 +27,7 @@ async function submit() {
           <input
             v-model="loginName"
             type="text"
-            placeholder="000000003"
+            placeholder="输入登录名"
             autocomplete="username"
             @keyup.enter="submit"
           />
@@ -51,8 +51,8 @@ async function submit() {
         </div>
 
         <p class="note" style="margin: 14px 0 0">
-          账号由本机 <span class="code">python -m app.cli seed-students</span> 初始化，
-          初始密码与学号相同；学号按字符串处理，保留前导零。
+          本地开发账号由初始化脚本创建；独立演示账号为 demo1—demo6，使用初始化时设置的密码。
+          跨设备访问时请使用运行服务的电脑地址。
         </p>
       </div>
     </div>

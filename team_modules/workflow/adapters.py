@@ -30,6 +30,7 @@ from shared.contracts import (
 )
 from shared.errors import AppError
 from shared.llm import LLMProvider
+from shared.progress import emit
 from shared.structured import json_schemas
 
 from .indexing.embedding import EMBEDDING_DIM, EMBEDDING_MODEL, ZhipuEmbedding
@@ -144,8 +145,6 @@ class EntityAdapter:
                 )
             )
         candidates.sort(key=lambda c: c.score or 0, reverse=True)
-        candidates = candidates[:limit]
-
         if not candidates:
             return Resolution(
                 outcome="not_found", candidates=[], index_version=ENTITY_INDEX_VERSION
@@ -158,7 +157,7 @@ class EntityAdapter:
         else:
             outcome = "ambiguous"
         return Resolution(
-            outcome=outcome, candidates=candidates, index_version=ENTITY_INDEX_VERSION
+            outcome=outcome, candidates=candidates[:limit], index_version=ENTITY_INDEX_VERSION
         )
 
 
@@ -171,6 +170,7 @@ class WorkflowAdapter:
     def respond(self, request: AssistantRequest, tools: AssistantTools) -> AssistantResult:
         """两个入口共用：理解意图，调用只读工具取事实，返回回答或待审建议。"""
         text = request.text.strip()
+        emit("interpreting")
         if self._classify_intent(text) == "suggest":
             return self._suggest(request, tools)
         return self._answer(request, tools)
@@ -241,7 +241,7 @@ class WorkflowAdapter:
             except AppError as exc:
                 warnings.append(f"任务事实回查不可用：{exc.message}")
 
-        if resolution is not None and resolution.outcome == "ambiguous":
+        if resolution is not None and resolution.outcome == "ambiguous" and not evidence:
             lines = "\n".join(
                 f"- {c.title or f'ID {c.entity_id}'}（ID {c.entity_id}）" for c in candidates
             )
@@ -281,6 +281,7 @@ class WorkflowAdapter:
         except AppError as exc:
             warnings.append(f"项目快照不可用：{exc.message}")
 
+        emit("generating")
         result = self.llm.complete(
             [
                 {"role": "system", "content": ANSWER_SYSTEM},
@@ -382,6 +383,7 @@ class WorkflowAdapter:
             "实体候选": [c.model_dump(mode="json") for c in candidates],
             "schema": json_schemas()["suggestion"],
         }
+        emit("generating")
         result = self.llm.complete(
             [
                 {"role": "system", "content": SUGGEST_SYSTEM},

@@ -40,24 +40,26 @@ watch(drawerOpen, (open) => {
 
   <div v-else class="app">
     <aside class="sidebar">
-      <div class="brand">
-        <h1>企业项目<br />智能协作平台</h1>
-        <div class="sub">PROJECT · KNOWLEDGE · AI</div>
-      </div>
-      <nav class="nav">
-        <RouterLink
-          v-for="item in NAV"
-          :key="item.name"
-          :to="{ name: item.name }"
-          @click="drawerOpen = false"
-        >
-          <span class="ico">{{ item.icon }}</span>{{ item.label }}
-        </RouterLink>
-      </nav>
-      <div class="sidebar-foot">
-        <b>六人协作 · PC Web</b><br />
-        <template v-if="isLive">已连接本机后端<br />数据来自真实接口</template>
-        <template v-else>演示数据，不连接后端<br />切换数据源可联调</template>
+      <div class="sidebar-inner">
+        <div class="brand">
+          <h1>企业项目<br />智能协作平台</h1>
+          <div class="sub">PROJECT · KNOWLEDGE · AI</div>
+        </div>
+        <nav class="nav">
+          <RouterLink
+            v-for="item in NAV"
+            :key="item.name"
+            :to="{ name: item.name }"
+            @click="drawerOpen = false"
+          >
+            <span class="ico">{{ item.icon }}</span>{{ item.label }}
+          </RouterLink>
+        </nav>
+        <div class="sidebar-foot">
+          <b>六人协作 · PC Web</b><br />
+          <template v-if="isLive">已连接项目后端<br />数据来自真实接口</template>
+          <template v-else>演示数据，不连接后端<br />切换数据源可联调</template>
+        </div>
       </div>
     </aside>
 
@@ -67,7 +69,7 @@ watch(drawerOpen, (open) => {
         <div class="crumb">
           <b>{{ projectName }}</b>
           <span class="sep">/</span>{{ currentLabel }}
-          <template v-if="isLive"><span class="sep">/</span>已连接本机后端</template>
+          <template v-if="isLive"><span class="sep">/</span>已连接项目后端</template>
         </div>
         <span v-if="isLive" class="badge badge-live">
           已连接 · {{ session.user ? session.user.display_name : '' }}
