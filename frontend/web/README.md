@@ -88,6 +88,20 @@ src/
 
 ## 自测
 
+### 助手对话视窗
+
+项目助手与任务AI助理共用`AssistantConversation.vue`：高度由视口决定，消息和执行阶段只在内部滚动，输入区始终留在视窗底部。默认跟随最新内容，手动上翻后暂停跟随，点击“回到最新消息”恢复。正式回答出现后自动折叠执行阶段，仍可手动展开；失败保留错误与原输入。
+
+以下浏览器回归使用合成HTTP响应，不调用模型或业务数据库。先以演示模式启动Vite，再从项目根目录运行（Playwright需由本机提供）：
+
+```powershell
+node tests/evaluation/check_assistant_conversation.mjs <playwright模块路径> http://127.0.0.1:5173
+```
+
+覆盖两处入口的桌面/手机固定高度、长回答、阶段更新、自动滚动、上翻历史、完成折叠、手动展开与失败重试。截图和结果写入被Git忽略的`artifacts/assistant_conversation/`。
+
+### 原有交互与逻辑检查
+
 ```bash
 pip install dukpy
 python frontend/tests/原型交互自测.py     # 63 项

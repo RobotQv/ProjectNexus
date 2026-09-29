@@ -10,6 +10,7 @@ import { computed, ref } from 'vue'
 
 import ChatMessages from './ChatMessages.vue'
 import AssistantProgress from './AssistantProgress.vue'
+import AssistantConversation from './AssistantConversation.vue'
 import { useAssistantProgress } from '@/composables/useAssistantProgress.js'
 import ModalDialog from './ModalDialog.vue'
 import SuggestionCard from './SuggestionCard.vue'
@@ -22,6 +23,7 @@ const { progress, send: sendWithProgress } = useAssistantProgress()
 
 const text = ref('')
 const sending = ref(false)
+const answerReady = ref(false)
 const busyId = ref(null)
 const messages = ref([])
 /** 同一次提问的网络重试复用 request_key；新提问换新的。 */
@@ -40,6 +42,7 @@ async function send() {
   messages.value.push({ role: 'me', text: value })
   text.value = ''
   sending.value = true
+  answerReady.value = false
   const out = await sendWithProgress('task_assistant', value, requestKey, () => { requestKey = newRequestKey() })
   sending.value = false
   if (!out) {
@@ -49,6 +52,7 @@ async function send() {
     return
   }
   messages.value.push({ role: 'ai', ...out })
+  answerReady.value = true
   requestKey = newRequestKey()
   requestText = ''
   for (const s of out.suggestions || []) draftIds.value.push(s.id)
@@ -81,7 +85,8 @@ const visibleDrafts = computed(() => drafts.value.filter((s) => draftIds.value.i
 </script>
 
 <template>
-  <ModalDialog title="任务 AI 助理" wide @close="emit('close')">
+  <ModalDialog title="任务 AI 助理" wide class="task-assistant-dialog" @close="emit('close')">
+    <AssistantConversation :pending="sending">
     <p class="note">
       入口与项目助手共用 <span class="code">POST /projects/{p}/assistant/messages</span>，
       以 <span class="code">entry=task_assistant</span> 区分。生成的是草稿：
@@ -121,7 +126,8 @@ const visibleDrafts = computed(() => drafts.value.filter((s) => draftIds.value.i
       </div>
     </template>
 
-    <AssistantProgress :progress="progress" />
+    <AssistantProgress :progress="progress" :pending="sending" :answered="answerReady" />
+    <template #composer>
     <div class="composer">
       <input
         v-model="text"
@@ -137,6 +143,8 @@ const visibleDrafts = computed(() => drafts.value.filter((s) => draftIds.value.i
     <p class="note" style="margin: 10px 0 0">
       正式实现由工作流抽取字段，缺失的负责人或日期保留待确认状态，不替你编造。
     </p>
+    </template>
+    </AssistantConversation>
 
     <template #footer>
       <button class="btn ghost" @click="emit('close')">关闭</button>
@@ -144,3 +152,10 @@ const visibleDrafts = computed(() => drafts.value.filter((s) => draftIds.value.i
     </template>
   </ModalDialog>
 </template>
+
+<style scoped>
+.task-assistant-dialog :deep(.modal) { height: min(760px, calc(100vh - 44px)); height: min(760px, calc(100dvh - 44px)); }
+.task-assistant-dialog :deep(.modal-body) { flex: 1; min-height: 0; padding: 0; overflow: hidden; }
+.task-assistant-dialog :deep(.modal-head), .task-assistant-dialog :deep(.modal-foot) { flex-shrink: 0; }
+.task-assistant-dialog :deep(.assistant-shell) { height: 100%; }
+</style>

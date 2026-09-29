@@ -4,6 +4,7 @@ import { computed, ref } from 'vue'
 import BlocksDialog from '@/components/BlocksDialog.vue'
 import ChatMessages from '@/components/ChatMessages.vue'
 import AssistantProgress from '@/components/AssistantProgress.vue'
+import AssistantConversation from '@/components/AssistantConversation.vue'
 import TaskHistoryDialog from '@/components/TaskHistoryDialog.vue'
 import { useAssistantProgress } from '@/composables/useAssistantProgress.js'
 import { newRequestKey } from '@/api/resources.js'
@@ -11,6 +12,7 @@ import { toast } from '@/stores/toasts.js'
 
 const text = ref('')
 const sending = ref(false)
+const answerReady = ref(false)
 const messages = ref([])
 const sourceDialog = ref(null)
 const historyTask = ref(null)
@@ -32,6 +34,7 @@ async function send() {
   messages.value.push({ role: 'me', text: value })
   text.value = ''
   sending.value = true
+  answerReady.value = false
   const out = await sendWithProgress('project_assistant', value, requestKey, () => { requestKey = newRequestKey() })
   sending.value = false
   if (!out) {
@@ -40,6 +43,7 @@ async function send() {
     return
   }
   messages.value.push({ role: 'ai', ...out })
+  answerReady.value = true
   requestKey = newRequestKey()
   requestText = ''
 }
@@ -73,7 +77,7 @@ function openEvidence(index, message) {
 
   <div class="split assistant-layout">
     <div class="card assistant-conversation">
-      <div class="card-body">
+      <AssistantConversation :pending="sending">
         <ChatMessages
           v-if="messages.length"
           :messages="messages"
@@ -92,25 +96,27 @@ function openEvidence(index, message) {
           </span>
         </div>
 
-        <AssistantProgress :progress="progress" />
-        <div class="composer">
-          <input
-            v-model="text"
-            type="text"
-            placeholder="试试：支付那块进度怎样，为什么卡住？"
-            :disabled="sending"
-            @keyup.enter="send"
-          />
-          <button class="btn" :disabled="sending || !text.trim()" @click="send">
-            {{ sending ? '思考中…' : '发送' }}
-          </button>
-        </div>
-        <p class="note" style="margin: 10px 0 0">
-          提问调用 <span class="code">POST /projects/{p}/assistant/messages</span>，
-          <span class="code">entry=project_assistant</span>。每次新提问生成新的 request_key，
-          网络重试复用原值。
-        </p>
-      </div>
+        <AssistantProgress :progress="progress" :pending="sending" :answered="answerReady" />
+        <template #composer>
+          <div class="composer">
+            <input
+              v-model="text"
+              type="text"
+              placeholder="试试：支付那块进度怎样，为什么卡住？"
+              :disabled="sending"
+              @keyup.enter="send"
+            />
+            <button class="btn" :disabled="sending || !text.trim()" @click="send">
+              {{ sending ? '思考中…' : '发送' }}
+            </button>
+          </div>
+          <p class="note" style="margin: 10px 0 0">
+            提问调用 <span class="code">POST /projects/{p}/assistant/messages</span>，
+            <span class="code">entry=project_assistant</span>。每次新提问生成新的 request_key，
+            网络重试复用原值。
+          </p>
+        </template>
+      </AssistantConversation>
     </div>
 
     <div class="card assistant-evidence">
