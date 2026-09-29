@@ -187,6 +187,14 @@ def test_progress_visible_during_request_and_scoped(env):
         assert future.result().status_code == 200
     final = env.client.get(path).json()
     assert final["terminal"] and final["events"][-1]["stage"] == "completed"
+    assert [e["stage"] for e in final["events"]] == [
+        "accepted",
+        "interpreting",
+        "generating",
+        "validating",
+        "persisting",
+        "completed",
+    ]
     assert [e["seq"] for e in final["events"]] == list(range(1, len(final["events"]) + 1))
 
 
@@ -195,6 +203,7 @@ def test_failed_run_has_terminal_event_and_no_automatic_retry(env):
 
     def fail(*args):
         calls.append(1)
+        emit("interpreting")
         raise AppError("llm_timeout", "超时", 504)
 
     env.app.state.modules.workflow.respond = fail
@@ -205,6 +214,7 @@ def test_failed_run_has_terminal_event_and_no_automatic_retry(env):
         env.prefix + "/assistant/progress", params={"request_key": "fail-alpha"}
     ).json()
     assert result["status"] == "failed" and result["events"][-1]["stage"] == "failed"
+    assert [e["stage"] for e in result["events"]] == ["accepted", "interpreting", "failed"]
     assert len(calls) == 1
 
 

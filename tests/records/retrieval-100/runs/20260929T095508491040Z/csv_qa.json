@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "results_rows": 500,
+  "summary_rows": 5,
+  "blank_no_answer_rows": 25,
+  "denominator": {
+    "A": 50,
+    "B": 45,
+    "Total": 95
+  },
+  "csv_modified": false
+}

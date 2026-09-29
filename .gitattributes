@@ -1,0 +1,9 @@
+# Frozen evaluation hashes are byte-based. Preserve their original line endings.
+team_modules/main_rag/retrieval.py text eol=lf
+team_modules/main_rag/adapter.py text eol=lf
+team_modules/main_rag/chunking.py text eol=lf
+# This historical input was frozen with CRLF; disable normalization for this file.
+team_modules/main_rag/indexing/embedding.py -text whitespace=cr-at-eol
+tests/evaluation/title_retrieval.py text eol=lf
+tests/evaluation/retrieval_metrics.py text eol=lf
+tests/evaluation/run_retrieval_100.py text eol=lf

@@ -1,0 +1,9 @@
+{
+  "status": "succeeded",
+  "dataset_sha256": "399322a6a46cbfae75151fe86e6633b2254a4464ad25f4bb2d85fbcb12c7f88d",
+  "started_utc": "20260929T095508491040Z",
+  "new_embeddings": 113,
+  "retrieval_rows": 500,
+  "failed": 0,
+  "completed_utc": "2026-09-29T09:55:51.670572+00:00"
+}

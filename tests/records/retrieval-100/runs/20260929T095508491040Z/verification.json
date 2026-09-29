@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "raw_rows": 500,
+  "csv_rows": 500,
+  "answerable_query_count": 95,
+  "no_answer_query_count": 5,
+  "no_answer_rows": 25,
+  "failed": 0,
+  "dataset_and_algorithm_hashes_unchanged": true,
+  "lexical_score_absolute_tolerance": 1e-12,
+  "floating_tie_reorderings": [
+    {
+      "question_id": "B03",
+      "method": "title_bm25",
+      "changes": [
+        {
+          "rank": 3,
+          "recomputed_chunk_id": "102:1:2",
+          "archived_chunk_id": "102:1:1",
+          "score_delta": 1.7763568394002505e-15
+        },
+        {
+          "rank": 4,
+          "recomputed_chunk_id": "102:1:1",
+          "archived_chunk_id": "102:1:2",
+          "score_delta": 1.7763568394002505e-15
+        }
+      ]
+    }
+  ],
+  "historical_rankings_modified": false,
+  "checks": [
+    "anchor coverage independently recalculated",
+    "CSV and summaries independently recalculated",
+    "body/title BM25 candidates recomputed",
+    "both RRF variants recomputed",
+    "project isolation and unchanged source text",
+    "all 500 rows accounted for"
+  ]
+}

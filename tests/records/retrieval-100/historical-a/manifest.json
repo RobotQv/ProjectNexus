@@ -1,0 +1,19 @@
+{
+  "created_utc": "20260929T092758Z",
+  "dataset_sha256": "cc7d1228447da9ad9475974e4357f640fa09c3b81be05a18ed59c5219190e9a6",
+  "questions": 50,
+  "chunks": 80,
+  "baseline_run": "20260929T091753Z",
+  "baseline_raw_sha256": "4cef224640b01d208c2cbc5c8676758cecd201057bf25520b2aaf4edd78d1bac",
+  "candidate_limit_per_channel": 20,
+  "rrf_constant": 60,
+  "weights": [
+    1,
+    1,
+    1
+  ],
+  "title_rule": "existing filename stem + distinct existing heading; BM25; positive scores only",
+  "external_api_calls": 0,
+  "dual_reproduction_verified": true,
+  "status": "succeeded"
+}

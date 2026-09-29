@@ -121,6 +121,8 @@ def respond(db, pid, actor, data, sessions, modules):
         begin_write(db)
         require_project(db, pid, actor, write=True)
         run = project_row(db, WorkflowRun, pid, rid)
+        # 阶段由独立 Session 写入；结束时必须读取最新事件，不能用初始缓存覆盖。
+        db.refresh(run, ["progress_events"])
         append_event(run, "persisting")
         for draft in result.suggestions:
             save_draft(db, run, validate_draft(db, pid, draft))
@@ -142,6 +144,7 @@ def respond(db, pid, actor, data, sessions, modules):
     except Exception as error:
         begin_write(db)
         run = project_row(db, WorkflowRun, pid, rid)
+        db.refresh(run, ["progress_events"])
         run.status, run.finished_at = "failed", utcnow()
         run.error = error.code if isinstance(error, AppError) else "module_execution_failed"
         append_event(run, "failed")

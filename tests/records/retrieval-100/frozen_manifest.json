@@ -1,0 +1,37 @@
+{
+  "created_utc": "2026-09-29T09:54:41.335822+00:00",
+  "status": "frozen",
+  "dataset_sha256": "399322a6a46cbfae75151fe86e6633b2254a4464ad25f4bb2d85fbcb12c7f88d",
+  "parameters": {
+    "rrf_constant": 60,
+    "candidate_limit_per_channel": 20,
+    "weights": [
+      1,
+      1,
+      1
+    ],
+    "chunk_strategy": "bounded",
+    "embedding": "embedding-3-2048",
+    "top_k": 5,
+    "rank_inspection_depth": 20,
+    "no_answer_in_hit_mrr": false
+  },
+  "algorithm_sha256": {
+    "team_modules/main_rag/retrieval.py": "f08227678d8b57202e7821206c0f5134d0a45aca6032e19d1f700b0c5459d184",
+    "team_modules/main_rag/adapter.py": "8fd407b8d46ef202d14ac81c028fde919a67e618c0a3dd581c99e106dd10b044",
+    "team_modules/main_rag/chunking.py": "be5713cada084c512e63ba496f28380adcab76152e20e7fafcfff552bfdf01c9",
+    "team_modules/main_rag/indexing/embedding.py": "cb8a780d17d349a1e6f7cc9e34acc65a1c5007beff7728864b341f7cf980029e",
+    "tests/evaluation/title_retrieval.py": "6e246d24f7fd9f1717dc97964ea10d165640cecca70e395881a6b800dcb5142b",
+    "tests/evaluation/retrieval_metrics.py": "a18589ef3e3988f526b3deb3240734cfc63d0738bb402d5c2e7e5c3172de6d2a",
+    "tests/evaluation/run_retrieval_100.py": "5f6779ba0f642574389d0be62c8064ec058e68b73897715dda62efdf881a7b92"
+  },
+  "source_a_dataset_sha256": "cc7d1228447da9ad9475974e4357f640fa09c3b81be05a18ed59c5219190e9a6",
+  "scope": "shared expanded corpus; per-query project filter",
+  "answerable_queries": 95,
+  "batch_b_anchor_distribution": {
+    "1": 37,
+    "2": 8,
+    "0": 5
+  },
+  "note": "A已看过结果；B在本次运行前冻结，开发者合成，非独立人工盲测。未调参。"
+}
